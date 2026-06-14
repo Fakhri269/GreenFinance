@@ -14,8 +14,8 @@ function AppContent() {
   const { currentUser } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Auth screens (no bottom nav/sidebar)
   if (!currentUser) {
     if (isRegistering) {
       return <Register onNavigateToLogin={() => setIsRegistering(false)} />;
@@ -23,11 +23,16 @@ function AppContent() {
     return <Login onNavigateToRegister={() => setIsRegistering(true)} />;
   }
 
-  // Main app with tab navigation
   const renderActivePage = () => {
     switch (activeTab) {
       case "home":
-        return <Dashboard setActiveTab={setActiveTab} />;
+        return (
+          <Dashboard
+            setActiveTab={setActiveTab}
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+          />
+        );
       case "history":
         return <History />;
       case "analytics":
@@ -35,7 +40,13 @@ function AppContent() {
       case "profile":
         return <Profile />;
       default:
-        return <Dashboard setActiveTab={setActiveTab} />;
+        return (
+          <Dashboard
+            setActiveTab={setActiveTab}
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+          />
+        );
     }
   };
 
@@ -44,7 +55,11 @@ function AppContent() {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="main-content-area animate-fade-in">
         {renderActivePage()}
-        <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+        <BottomNav
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onAddPress={() => setIsModalOpen(true)}
+        />
       </div>
     </>
   );

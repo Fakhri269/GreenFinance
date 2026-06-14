@@ -1,33 +1,39 @@
-import React from "react";
+// Sidebar.jsx
+import React, { useState, useEffect } from "react";
 import { Home, Clock, PieChart, User, LogOut, Wallet } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
+const navItems = [
+  { id: "home",      label: "Home Dashboard",    Icon: Home     },
+  { id: "history",   label: "Riwayat Transaksi", Icon: Clock    },
+  { id: "analytics", label: "Analisis Keuangan", Icon: PieChart },
+  { id: "profile",   label: "Profil Akun",        Icon: User     },
+];
+
 export default function Sidebar({ activeTab, setActiveTab }) {
   const { currentUser, logout } = useAuth();
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
-  const navItems = [
-    { id: "home", label: "Home Dashboard", icon: Home },
-    { id: "history", label: "Riwayat Transaksi", icon: Clock },
-    { id: "analytics", label: "Analisis Keuangan", icon: PieChart },
-    { id: "profile", label: "Profil Akun", icon: User }
-  ];
+  useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
+  if (!isDesktop) return null;
+
+  const name  = currentUser?.displayName || "Pengguna Demo";
+  const email = currentUser?.email       || "demo@greenfinance.com";
 
   const handleLogout = async () => {
     if (window.confirm("Apakah Anda yakin ingin keluar dari akun?")) {
-      try {
-        await logout();
-      } catch (err) {
-        console.error("Gagal keluar:", err);
-      }
+      try { await logout(); }
+      catch (err) { console.error("Gagal keluar:", err); }
     }
   };
 
-  const name = currentUser?.displayName || "Pengguna Demo";
-  const email = currentUser?.email || "demo@greenfinance.com";
-
   return (
     <aside className="desktop-sidebar animate-fade-in">
-      {/* Brand Header */}
       <div className="sidebar-brand">
         <div className="brand-logo-wrapper">
           <Wallet size={22} />
@@ -38,27 +44,21 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         </div>
       </div>
 
-      {/* Navigation menu items */}
       <nav className="sidebar-nav">
-        {navItems.map((item) => {
-          const IconComponent = item.icon;
-          const isActive = activeTab === item.id;
-          
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`sidebar-nav-item ${isActive ? "sidebar-nav-item-active" : ""}`}
-              aria-label={`Buka halaman ${item.label}`}
-            >
-              <IconComponent size={20} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
+        {navItems.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`sidebar-nav-item ${activeTab === id ? "sidebar-nav-item-active" : ""}`}
+            aria-label={`Buka halaman ${label}`}
+            aria-current={activeTab === id ? "page" : undefined}
+          >
+            <Icon size={20} />
+            <span>{label}</span>
+          </button>
+        ))}
       </nav>
 
-      {/* Footer / User Details */}
       <div className="sidebar-footer">
         <div className="sidebar-user-info">
           <div className="sidebar-user-avatar">
